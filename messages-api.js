@@ -21,8 +21,7 @@ const messageLimit = (req, res, next) => {
   console.log(request , ` /5 messageLimit`);
 };
 
-app
-  .use(messageLimit)
+app.use(messageLimit)
   .use(jsonParser)
 
   .post(`/messages`, (req, res) => {

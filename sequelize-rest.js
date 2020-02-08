@@ -13,57 +13,50 @@ const app = express();
 app.use(bodyParser.json());
 app.use(router);
 
-const Movie = db.define(`Movie`, {
+const Movie = db.define( `Movie`, {
   title: Sequelize.TEXT,
   yearOfRelease: Sequelize.INTEGER,
-  synopsis: Sequelize.TEXT
+  synopsis: Sequelize.TEXT,
 });
 
-const movies = [
-  {
-    title: `Top Gun`,
-    yearOfRelease: 1985,
-    synopsis:
-      `Eighties flic`
-  },
-  {
-    title: `Casino`,
-    yearOfRelease: 1996,      // Persistent, HARDCODED 
-    synopsis:
-      `Maffia flic`
-  },
-  {
-    title: `The dark knight`,
-    yearOfRelease: 2008,
-    synopsis:
-      `Vigilante flic`
-  }
-];
-
 // db.sync({force: true }) // to overwrite!
-db
-  .sync()
-  .then(() => console.log(`Tables created`))
-  // .then(() => Promise.all([ // Insert 3 new rows
-  //   Movie.create({ title: 'Junior JavaScript developer at Travel yearsOfRelease', yearsOfRelease: 13, synopsis: `prul` }),
-  //   Movie.create({ title: 'Data Scientist [m/w] at Consulting Agency', yearsOfRelease: 234, synopsis: `prul` }),
-  //   Movie.create({ title: 'Web-based Game Developer Urgently Needed', yearsOfRelease: 765, synopsis: `brol` }),
-  // ]))
-  .then(() => {
-    const moviePromises = movies.map(movie => Movie.create(movie));
-    if (Movie === []){
-      return Promise.all(moviePromises);
-    }
-    return null; 
-  })
+
+db.sync()
+  .then(console.log(`db synced`))
+  .then(hardCoded())
   .catch(err => {
     console.error(`Table schema fail`, err);
     process.exit(1);
   })
+  .catch(console.error);
+
+
+function hardCoded() {
+  Movie.findAll()
+    .then(data => {
+      data.length === 0 && Promise.all ([     // Don't forget this!
+
+          Movie.create({
+            title: `Top Gun`,
+            yearOfRelease: 1985,
+            synopsis: `Eighties flic`
+          }),
+          Movie.create({
+            title: `Casino`,
+            yearOfRelease: 1996,      // Persistent, HARDCODED 
+            synopsis: `Maffia flic`
+          }),
+          Movie.create({
+            title: `The Dark Knight`,
+            yearOfRelease: 2008,
+            synopsis: `Vigilante flic`
+          })
+
+        ]);
+    })
+    .catch(console.error);
+}
   
-  // .catch(console.error);
-
-
 router.get(`/movies`, (req, res, next) => {
   const limit = req.query.limit || 4;
   const offset = req.query.offset || 0;
@@ -104,9 +97,7 @@ router.put(`/movies/:id`, (req, res, next) => {
 router.delete(`/movies/:id`, (req, res, next) => {
   res.send(`DELETED`); 
   Movie.destroy({
-    where: {
-      id: req.params.id
-    }
+    where: {id: req.params.id}
   })
     .then(deletedOne => {
       if (deletedOne) {
