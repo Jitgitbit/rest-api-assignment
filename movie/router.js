@@ -1,9 +1,15 @@
 const { Router } = require('express')
 const router = new Router()
 const { Movie } = require(`./model`);
-const db = require(`../db`);
+const db = require(`../sequelize-rest`);
+
 
 router.get('/movies', (req, res, next) => {
+  Movie.create(`Movie`, {
+    title: `Top Gun`,
+    yearOfRelease: 1985,
+    synopsis: `bla`,
+  });
   Movie.findAll()
     .then(movies => {
       res.send(movies);
