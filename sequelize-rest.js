@@ -32,9 +32,10 @@ db.sync()
 
 
 function hardCoded() {
+
   Movie.findAll()
     .then(data => {
-      data.length === 0 && Promise.all ([     // Don't forget this!
+      data.length === 0 && Promise.all ([     // Don't forget this! Otherwise adds with each reload !
 
           Movie.create({
             title: `Top Gun`,
@@ -58,6 +59,7 @@ function hardCoded() {
 }
   
 router.get(`/movies`, (req, res, next) => {
+
   const limit = req.query.limit || 4;
   const offset = req.query.offset || 0;
   Movie.findAndCountAll({ limit, offset })
@@ -66,6 +68,7 @@ router.get(`/movies`, (req, res, next) => {
 });
 
 router.get(`/movies/:id`, (req, res, next) => {
+
   Movie.findByPk(req.params.id)
     .then(params => {
       res.send(params);
@@ -74,15 +77,19 @@ router.get(`/movies/:id`, (req, res, next) => {
 });
 
 router.post(`/movies`, (req, res, next) => {
+
   console.log(`req.body is `, req.body)
+
   Movie.create(req.body)
     .then(movie => {
       res.json(movie);  // .send for strings, .json for data
     })
+    .then(res.send(`ADDED`))
     .catch(err => next(err))
 })
 
-router.put(`/movies/:id`, (req, res, next) => {
+router.put(`/movies/:id`, (req, res, next) => { 
+
   Movie.findByPk(req.params.id)
     .then(movie => {
       if (movie) {
@@ -91,11 +98,12 @@ router.put(`/movies/:id`, (req, res, next) => {
         res.status(404).end();
       }
     })
+    .then(res.send(`UPDATED`))
     .catch(next);
 });
 
 router.delete(`/movies/:id`, (req, res, next) => {
-  res.send(`DELETED`); 
+  
   Movie.destroy({
     where: {id: req.params.id}
   })
@@ -106,6 +114,7 @@ router.delete(`/movies/:id`, (req, res, next) => {
         res.status(404).end();
       }
     })
+    .then(res.send(`DELETED`))
     .catch(err => next(err));
 });
 
