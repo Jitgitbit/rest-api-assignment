@@ -1,48 +1,40 @@
-const express = require('express');
-// const db = require(`./sequelize-rest`);
-// const Movie = require(`./movie/model`);
-const movieRouter = require(`./movie/router`);
-const bodyParser = require(`body-parser`);
-const cors = require(`cors`);
-
+const express = require("express");
+const bodyParser = require("body-parser");
+const jsonParser = bodyParser.json()
 const app = express();
-const corsMiddleware = cors()
-const parserMiddleware = bodyParser.json()
+const port = 3000;
 
-const port = process.env.PORT || 3000;
-const movies = [
-  { id: 1, title: "To Kill a Mockingbird", yearOfRelease: 1988, synopsis: "Harper Lee" },
-  { id: 2, title: "Harry Potter and the Sorcerer's Stone", yearOfRelease: 1981, synopsis: "J.K. Rowling" },
-  { id: 3, title: "Pride and Prejudice", yearOfRelease: 1980, synopsis: "bla" },
-]
+let request = 0;
+const messageLimit = (req, res, next) => {
+  if (request > 5) {
+    res.status(429).json({
+      message: "Too Many Requests"
+    });
+  } else {
+    request++;
+    next();
+  }
+  console.log("test messageLimit", request);
+};
 
-app.use(corsMiddleware);  //sequence matters!
-app.use(parserMiddleware);
+app
+  .use(messageLimit)
+  .use(jsonParser)
 
-app.use(movieRouter);
-
-app.get('/', (req, res) => res.redirect('/movies'))
-app.get('/movies', (req, res) => res.json({ data: movies }))
-app.get('/movies/:movieId', (req, res) => {
-const movieId = req.params.movieId
-const movie = movies.find(b => b.id == movieId)
-if (movie) {
-    res.json(movie)
-} else {
-    res.status(404).end()
-}
-}) 
-
-app.listen(port, () => {console.log(`Listening on :${port}`)});
-
-
-
-  
-  
-  
-  
-  
-
-  
-  
-  
+  .post("/messages", (req, res) => {
+    console.log(req.body.text);
+    console.log(req.is('text/*'));  
+    if (!req.body.text || req.body === "") {
+      res.status(400).json({
+        message: "Bad Request"
+      });
+      console.log("request failed");
+      return;
+    } else {
+      res.json({
+        message: `This is the message that was sent`
+      });
+      console.log("request passed");
+    }
+  })
+  .listen(port, () => console.log(`Message api listening on port ${port}!`));

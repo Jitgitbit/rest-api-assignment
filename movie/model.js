@@ -1,19 +1,10 @@
 const Sequelize = require('sequelize');
 const db = require(`../sequelize-rest`);
 
-const Movie = db.define(
-  'Movie',
-  {
-    title: {
-      type: Sequelize.STRING,
-    },
-    yearOfRelease: {
-      type: Sequelize.INTEGER
-    },
-    synopsis: {
-      type: Sequelize.STRING
-    }
-  }
-)
+const Movie = db.define("movie", {
+  title: Sequelize.TEXT,
+  yearOfRelease: Sequelize.INTEGER,
+  synopsis: Sequelize.TEXT
+});
 
 module.exports = { Movie }
