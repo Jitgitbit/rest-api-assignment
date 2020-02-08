@@ -1,40 +1,44 @@
-const express = require("express");
-const bodyParser = require("body-parser");
+const express = require(`express`);
+const bodyParser = require(`body-parser`);
+
 const jsonParser = bodyParser.json()
 const app = express();
-const port = 3000;
+
+const port = process.env.PORT || 3000;
 
 let request = 0;
+
 const messageLimit = (req, res, next) => {
-  if (request > 5) {
+  if (request >= 5) {
+    console.log(`Request limit reached`)
     res.status(429).json({
-      message: "Too Many Requests"
+      message: `Too many requests`
     });
   } else {
     request++;
     next();
   }
-  console.log("test messageLimit", request);
+  console.log(request , ` /5 messageLimit`);
 };
 
 app
   .use(messageLimit)
   .use(jsonParser)
 
-  .post("/messages", (req, res) => {
-    console.log(req.body.text);
-    console.log(req.is('text/*'));  
-    if (!req.body.text || req.body === "") {
+  .post(`/messages`, (req, res) => {
+    console.log(req.body.message);
+    if (!req.body.message || req.body === ``) {
       res.status(400).json({
-        message: "Bad Request"
+        message: `Bad request`
       });
-      console.log("request failed");
+      console.log(`Request failed`);
       return;
     } else {
       res.json({
         message: `This is the message that was sent`
       });
-      console.log("request passed");
+      console.log(`Request passed`);
     }
   })
-  .listen(port, () => console.log(`Message api listening on port ${port}!`));
+
+app.listen(port, () => console.log(`Message api listening on port ${port}!`));
